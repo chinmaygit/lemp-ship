@@ -1,0 +1,42 @@
+version: '3'
+services:
+  nginx:
+    image: nginx
+    ports:
+      - "80:80"
+    links:
+      - php
+    volumes: 
+      - ./nginx/site.conf:/etc/nginx/conf.d/default.conf
+      - ./public:/var/www/html
+      
+      - ./logs/nginx.access.log:/var/log/nginx/access.log
+      - ./logs/nginx.error.log:/var/log/nginx/error.log
+    depends_on:
+      - php
+      - mysql
+
+  php:
+    image: php:7-fpm
+    volumes:
+      - ./public:/var/www/html
+
+  mysql:
+    image: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - "./data/db/mysql:/var/lib/mysql"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      MYSQL_USER_NAME: root
+      MYSQL_ROOT_PASSWORD: root
+      PMA_ARBITRARY: 1
+      PMA_HOST: mysql
+    restart: always
+    ports:
+      - "8183:80"
+    depends_on:
+      - mysql
